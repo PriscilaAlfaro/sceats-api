@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const RestaurantSchema = new mongoose.Schema({
   name: String,
-  _id: Number,
+  rating: Number,
 });
 
 //https://mongoosejs.com/docs/models.html

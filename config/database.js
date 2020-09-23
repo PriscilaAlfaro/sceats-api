@@ -13,6 +13,7 @@ const connect = () => {
   const opts = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    useFindAndModify: false,
   };
   mongoose.connect(mongoConnectionString, opts);
   console.log({ mongoConnectionString });

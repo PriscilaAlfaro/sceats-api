@@ -1,11 +1,14 @@
+//See JWT https://stackabuse.com/authentication-and-authorization-with-jwts-in-express-js/
+
 const express = require("express");
 const app = express();
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 
-const accessTokenSecret = "youraccesstokensecret";
-//create a refresh token secret and an empty array to store refresh tokens
-const refreshTokenSecret = "yourrefreshtokensecrethere";
+const accessTokenSecret =
+  process.env.ACCESS_TOKEN_SECRET || "youraccesstokensecret";
+const refreshTokenSecret =
+  process.env.REFRESH_TOKEN_SECRET || "yourrefreshtokensecrethere"; //create a refresh token secret and an empty array to store refresh tokens
 let refreshTokens = [];
 
 app.use(bodyParser.json());
@@ -23,13 +26,14 @@ const users = [
   },
 ];
 
-//cada vez que yo me logueo el app me manda 2 token: accessToken Y refreshToken-
-//El access token tiene un tiempo para ser usado
+//Every time I login, app sendme 2 tokens: accessToken and refreshToken
+//Access token has a time to be used
 app.post("/login", (req, res) => {
   // Read username and password from request body
   const { username, password } = req.body;
 
   // Filter user from the users array by username and password
+  //This should be checked in dababase
   const user = users.find((u) => {
     return u.username === username && u.password === password;
   });
@@ -59,7 +63,7 @@ app.post("/login", (req, res) => {
   }
 });
 
-//Cuando el accessToken expira yo solo mando el refresh token recibido cuando me loguee a este enpoint, el cual me manda de nuevo un access token
+//When accessToken expires, I send the refreshToken that I received the first time I login in the app  (to the token endpoint), and I receive a new accessToken.
 //create a request handler that generated new tokens based on the refresh tokens:
 app.post("/token", (req, res) => {
   const { token } = req.body;
