@@ -1,7 +1,5 @@
 const express = require("express");
 const app = express();
-const { connect } = require("./config/database");
-const Restaurant = require("./models/restaurants");
 
 app.use(express.json());
 
@@ -97,5 +95,3 @@ app.delete("/api/v1/restaurants/:restaurantId", (req, res) => {
 app.listen(5000, () => {
   console.log("Running on port 5000");
 });
-
-connect();
