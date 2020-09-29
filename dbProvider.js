@@ -7,99 +7,83 @@ const mongoose = require("mongoose");
 const restaurants = require("./models/restaurants");
 const Restaurant = require("./models/restaurants");
 
-function getAllElements() {
-  return restaurants.find({}).then((restaurants) => {
-    return restaurants;
-  });
+async function getAllElements() {
+  return await restaurants.find({});
 }
 
-function getById(id) {
+async function getById(id) {
   //verify if id is + or - than String of 12 bytes or a string of 24 hex characters with Bad request (400) instead a 500
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return Promise.reject({ message: `No valid id: ${id}`, code: 400 });
+    throw { message: `No valid id: ${id}`, code: 400 };
   }
-  return restaurants.findById({ _id: id }).then((restaurant) => {
-    if (restaurant) {
-      return restaurant;
-    } else {
-      throw {
-        message: `The restaurant ${id} does not exist`, //send a Bad Request (400) if Id does not exist, instead a 500
-        code: 400,
-      };
-    }
-  });
-}
 
-function saveElementInDb(restaurant) {
-  const newRestaurant = new Restaurant(restaurant);
-  return newRestaurant.save(newRestaurant).then((restaurant) => {
+  const restaurant = await restaurants.findById({ _id: id });
+  if (restaurant) {
     return restaurant;
-  });
+  } else {
+    throw {
+      message: `The restaurant ${id} does not exist`, //send a Bad Request (400) if Id does not exist, instead a 500
+      code: 400,
+    };
+  }
 }
 
-function replaceElement(id, datatoUpdate) {
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return Promise.reject({ message: `No valid id: ${id}`, code: 400 });
-  }
-
-  return restaurants.findById({ _id: id }).then((rest) => {
-    if (!rest) {
-      throw {
-        message: `The restaurant ${id} does not exist`,
-        code: 400,
-      };
-    } else {
-      return restaurants
-        .findOneAndReplace({ _id: id }, datatoUpdate, {
-          new: true,
-          upsert: true,
-        })
-        .then((restaurant) => {
-          return restaurant;
-        });
-    }
-  });
+async function saveElementInDb(restaurant) {
+  const newRestaurant = new Restaurant(restaurant);
+  return await newRestaurant.save(newRestaurant);
 }
 
-function updateASingleValue(id, dataToUpdate) {
+async function replaceElement(id, datatoUpdate) {
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return Promise.reject({ message: `No valid id: ${id}`, code: 400 });
+    throw { message: `No valid id: ${id}`, code: 400 };
   }
-  return restaurants.findById({ _id: id }).then((rest) => {
-    if (!rest) {
-      throw {
-        message: `The restaurant ${id} does not exist`,
-        code: 400,
-      };
-    } else {
-      return restaurants
-        .findByIdAndUpdate({ _id: id }, dataToUpdate, {
-          new: true,
-          upsert: true,
-        })
-        .then((restaurant) => {
-          return restaurant;
-        });
-    }
-  });
+  const restaurant = await restaurants.findById({ _id: id });
+  if (!restaurant) {
+    throw {
+      message: `The restaurant ${id} does not exist`,
+      code: 400,
+    };
+  } else {
+    return await restaurants.findOneAndReplace({ _id: id }, datatoUpdate, {
+      new: true,
+      upsert: true,
+    });
+  }
 }
 
-function deleteElement(id) {
+async function updateASingleValue(id, dataToUpdate) {
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return Promise.reject({ message: `No valid id: ${id}`, code: 400 });
+    throw { message: `No valid id: ${id}`, code: 400 };
   }
-  return restaurants.findById({ _id: id }).then((rest) => {
-    if (!rest) {
-      throw {
-        message: `The restaurant ${id} does not exist`,
-        code: 400,
-      };
-    } else {
-      return restaurants.findOneAndDelete({ _id: id }).then(() => {
-        return `Restaurant ${id} was deleted`;
-      });
-    }
-  });
+  const restaurant = await restaurants.findById({ _id: id });
+  if (!restaurant) {
+    throw {
+      message: `The restaurant ${id} does not exist`,
+      code: 400,
+    };
+  } else {
+    return await restaurants.findByIdAndUpdate({ _id: id }, dataToUpdate, {
+      new: true,
+      upsert: true,
+    });
+  }
+}
+
+async function deleteElement(id) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw { message: `No valid id: ${id}`, code: 400 };
+  }
+
+  const restaurant = await restaurants.findById({ _id: id });
+  if (!restaurant) {
+    throw {
+      message: `The restaurant ${id} does not exist`,
+      code: 400,
+    };
+  } else {
+    await restaurants.findOneAndDelete({ _id: id });
+    return `Restaurant ${id} was deleted`;
+  }
 }
 module.exports = {
   saveElementInDb,
